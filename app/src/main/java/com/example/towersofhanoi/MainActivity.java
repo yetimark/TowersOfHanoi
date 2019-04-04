@@ -8,71 +8,91 @@ import android.widget.TextView;
 
 public class MainActivity extends AppCompatActivity {
 
-    private TextView disk0TV, disk1TV, disk2TV, fakeDiskTV;
-    private Disk disk0, disk1, disk2, fakeDisk;
-    private ViewGroup tower0VG, tower1VG, tower2VG, placeholderVG;
-    private Stack tower0Stk, tower1Stk, tower2Stk, placeholderStk;
+    private TextView disk0TV, disk1TV, disk2TV;
+    private Disk disk0, disk1, disk2, placeHolder;
+    private Tower tower0, tower1, tower2;
+    private ViewGroup tower0VG, tower1VG, tower2VG, placeHolderVG;
+    boolean placeHolderIsEmpty = true;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        //Create TextViews
+        this.disk0TV = (TextView)this.findViewById(R.id.disk0);
+        this.disk1TV = (TextView)this.findViewById(R.id.disk1);
+        this.disk2TV = (TextView)this.findViewById(R.id.disk2);
 
-        //#FIXME: Do I need variables for the TVs since I have it in Disk?  NO
-        //this section was left in incase inclass solution differs greatly
-        this.disk0TV = this.findViewById(R.id.disk0);
-        this.disk1TV = this.findViewById(R.id.disk1);
-        this.disk2TV = this.findViewById(R.id.disk2);
-        //this.fakeDiskTV = this.findViewById(R.id.fakeTV);
+        //Create Disks
+        this.disk0 = new Disk(1);
+        this.disk1 = new Disk(2);
+        this.disk2 = new Disk(3);
+        this.placeHolder = null;
 
-        this.disk0 = new Disk(1, this.disk0TV);
-        this.disk1 = new Disk(2, this.disk1TV);
-        this.disk2 = new Disk(3, this.disk2TV);
-        //this.fakeDisk = new Disk(-1);
+        //Create Towers
+        this.tower0 = new Tower();
+        this.tower1 = new Tower();
+        this.tower2 = new Tower();
 
-        this.placeholderVG = this.findViewById(R.id.placeHolderVG);
+        //Create ViewGroups
         this.tower0VG = this.findViewById(R.id.tower0VG);
         this.tower1VG = this.findViewById(R.id.tower1VG);
         this.tower2VG = this.findViewById(R.id.tower2VG);
+        this.placeHolderVG = this.findViewById(R.id.placeHolderVG);
 
-        this.placeholderStk = new Stack("PlaceHolder");
-        this.tower0Stk = new Stack("Tower0");
-        this.tower1Stk = new Stack("Tower1");
-        this.tower2Stk = new Stack("Tower2");
-
-
-        //Fill First Stack
-        this.tower0Stk.push(this.disk2);
-        this.tower0Stk.push(this.disk1);
-        this.tower0Stk.push(this.disk0);
+        //Fill First Tower
+        this.tower0.push(this.disk2);
+        this.tower0.push(this.disk1);
+        this.tower0.push(this.disk0);
         this.displayTowers();
+    }
+
+
+    //Resets game on win condition
+    private void resetGame()
+    {
+        if(this.tower2.getCount() == 3)
+        {
+            this.finish();
+            this.startActivity(getIntent());
+        }
+    }
+
+    private void selectSource(Tower tower, ViewGroup towerVG)
+    {
+        if(tower.peek() != null)
+        {
+            this.placeHolder = tower.pop();
+            TextView temp = (TextView)towerVG.getChildAt(0);
+            towerVG.removeViewAt(0);
+            this.placeHolderVG.addView(temp);
+            this.placeHolderIsEmpty = false;
+        }
+    }
+
+    private void selectDestination(Tower tower, ViewGroup towerVG)
+    {
+        if(tower.push(this.placeHolder))
+        {
+            this.placeHolder = null;
+            TextView temp = (TextView)this.placeHolderVG.getChildAt(0);
+            this.placeHolderVG.removeViewAt(0);
+            towerVG.addView(temp, 0);
+            this.placeHolderIsEmpty = true;
+        }
     }
 
     //0
     public void tower0ButtonPressed(View v)
     {
-        if(this.placeholderStk.peek().getSize() != -1)
+        if(this.placeHolderIsEmpty)
         {
-            if(this.tower0Stk.isSmaller(this.placeholderStk.peek()))
-            {
-                //ADD to tower
-                Disk tempDisk = this.placeholderStk.pop();
-                this.tower0Stk.push(tempDisk);
-
-                View temp = this.placeholderVG.getChildAt(0);
-                this.placeholderVG.removeViewAt(0);
-                this.tower0VG.addView(temp, 0);
-            }
+            this.selectSource(this.tower0, this.tower0VG);
         }
-        else if(this.tower0Stk.peek().getSize() != -1)
+        else
         {
-            //REMOVE from tower
-            Disk tempDisk = this.tower0Stk.pop();
-            this.placeholderStk.push(tempDisk);
-
-            View temp = this.tower0VG.getChildAt(0);
-            this.tower0VG.removeViewAt(0);
-            this.placeholderVG.addView(temp);
+            this.selectDestination(this.tower0, this.tower0VG);
         }
         this.displayTowers();
     }
@@ -80,28 +100,13 @@ public class MainActivity extends AppCompatActivity {
     //1
     public void tower1ButtonPressed(View v)
     {
-        if(this.placeholderStk.peek().getSize() != -1)
+        if(this.placeHolderIsEmpty)
         {
-            if(this.tower1Stk.isSmaller(this.placeholderStk.peek()))
-            {
-                //ADD to tower
-                Disk tempDisk = this.placeholderStk.pop();
-                this.tower1Stk.push(tempDisk);
-
-                View temp = this.placeholderVG.getChildAt(0);
-                this.placeholderVG.removeViewAt(0);
-                this.tower1VG.addView(temp, 0);
-            }
+            this.selectSource(this.tower1, this.tower1VG);
         }
-        else if(this.tower1Stk.peek().getSize() != -1)
+        else
         {
-            //REMOVE from tower
-            Disk tempDisk = this.tower1Stk.pop();
-            this.placeholderStk.push(tempDisk);
-
-            View temp = this.tower1VG.getChildAt(0);
-            this.tower1VG.removeViewAt(0);
-            this.placeholderVG.addView(temp);
+            this.selectDestination(this.tower1, this.tower1VG);
         }
         this.displayTowers();
     }
@@ -109,37 +114,29 @@ public class MainActivity extends AppCompatActivity {
     //2
     public void tower2ButtonPressed(View v)
     {
-        if(this.placeholderStk.peek().getSize() != -1)
+        if(this.placeHolderIsEmpty)
         {
-            if(this.tower2Stk.isSmaller(this.placeholderStk.peek()))
-            {
-                //ADD to tower
-                Disk tempDisk = this.placeholderStk.pop();
-                this.tower2Stk.push(tempDisk);
-
-                View temp = this.placeholderVG.getChildAt(0);
-                this.placeholderVG.removeViewAt(0);
-                this.tower2VG.addView(temp, 0);
-            }
+            this.selectSource(this.tower2, this.tower2VG);
         }
-        else if(this.tower2Stk.peek().getSize() != -1)
+        else
         {
-            //REMOVE from tower
-            Disk tempDisk = this.tower2Stk.pop();
-            this.placeholderStk.push(tempDisk);
-
-            View temp = this.tower2VG.getChildAt(0);
-            this.tower2VG.removeViewAt(0);
-            this.placeholderVG.addView(temp);
+            this.selectDestination(this.tower2, this.tower2VG);
         }
         this.displayTowers();
+
+        this.resetGame();
     }
 
     public void displayTowers()
     {
-        this.placeholderStk.display();
-        this.tower0Stk.display();
-        this.tower1Stk.display();
-        this.tower2Stk.display();
+        System.out.println(" \n");
+        if(this.placeHolder != null)
+        {
+            this.placeHolder.display();
+        }
+        this.tower0.display();
+        this.tower1.display();
+        this.tower2.display();
+        System.out.println("\n ");
     }
 }

@@ -5,18 +5,12 @@ import android.widget.TextView;
 public class Disk
 {
     private int size;
-    private TextView tv;
+    private Disk nextDisk;
 
     public Disk(int size)
     {
         this.size = size;
-        this.tv = null;
-    }
-
-    public Disk(int size, TextView tv)
-    {
-        this.size = size;
-        this.tv = tv;
+        this.nextDisk = null;
     }
 
     public int getSize()
@@ -24,8 +18,24 @@ public class Disk
         return this.size;
     }
 
-    public TextView getTV()
+    public Disk getNextDisk()
     {
-        return this.tv;
+        return this.nextDisk;
+    }
+
+    public void setNextDisk(Disk newNext)
+    {
+        this.nextDisk = newNext;
+    }
+
+    public void display()
+    {
+        String answer = "";
+        for(int i = 0; i < this.size; i++)
+        {
+            answer += "*";
+            answer += "*";
+        }
+        System.out.println(answer);
     }
 }
